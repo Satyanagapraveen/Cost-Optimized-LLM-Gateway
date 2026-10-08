@@ -1,0 +1,31 @@
+models:
+ high_tier: "gemini/gemini-2.5-pro"
+ mid_tier: "gemini/gemini-3.5-flash-lite"
+ low_tier: "groq/qwen/qwen3.8-27b"
+ embedding: "gemini/text-embedding-001"
+
+caching:
+ enabled: true
+ similarity_threshold: 0.95
+ ttl_seconds: 86400
+
+routing_rules:
+ - name: "complex_task_keyword"
+   condition: "contains_keyword"
+   keywords: ["synthesize", "analyze", "critique", "architect"]
+   target_tier:  high_tier
+
+ - name: "long_context"
+   condition: "max_tokens_exceeded"
+   threshold: 1000
+   target_tier:  mid_tier
+
+ - name: "default"
+   condition: "catch_all"
+   target_tier:  low_tier
+
+fallbacks:
+ - primary: "groq/openai/gpt-oss-20b"
+   backup: "openrouter/nvidia/nemotron-3.5-lightning:free"
+
+   
