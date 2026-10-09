@@ -1,5 +1,5 @@
 models:
- high_tier: "gemini/gemini-2.5-pro"
+ high_tier: "gemini/gemini-3.8-flash"
  mid_tier: "gemini/gemini-3.5-flash-lite"
  low_tier: "groq/qwen/qwen3.8-27b"
  embedding: "gemini/text-embedding-001"
