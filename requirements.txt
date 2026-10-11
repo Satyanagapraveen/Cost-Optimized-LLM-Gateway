@@ -6,3 +6,6 @@ tiktoken
 litellm
 numpy
 redis
+sqlalchemy
+asyncpg
+greenlet
