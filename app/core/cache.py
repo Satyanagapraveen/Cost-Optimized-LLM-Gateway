@@ -4,7 +4,7 @@ from typing import Optional, Dict, List
 import numpy as np
 import redis.asyncio as redis
 from redis.commands.search.field import VectorField, TextField
-from redis.commands.search.indexDefinition import IndexDefinition, IndexType
+from redis.commands.search.index_definition import IndexDefinition, IndexType
 from redis.commands.search.query import Query
 from app.config import config
 
