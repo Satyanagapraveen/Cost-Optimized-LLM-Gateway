@@ -1,8 +1,11 @@
 import logging
 from fastapi import FastAPI
+import uuid
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 
 from app.api.schemas import GatewayRequest, GatewayResponse
 from app.core.preprocessing import process_prompt
@@ -104,7 +107,51 @@ async def chat_completions(request: GatewayRequest, background_tasks: Background
         raise HTTPException(status_code=500, detail="Internal Gateway Error")
 
     
+@app.get("/v1/analytics/requests/{request_id}")
+async def get_request_log(request_id:uuid.UUID):
+    async with AsyncSessionLocal() as db:
+        # Build the SQL query: SELECT * FROM request_logs WHERE id = request_id
+        query = select(RequestLog).where(RequestLog.id == request_id)
+        
+        # Execute the query and get the result
+        result = await db.execute(query)
+        
+        # scalar_one_or_none() extracts the single row, or returns None if missing
+        log = result.scalar_one_or_none()
+        if not log:
+            raise HTTPException(status_code=404, detail=" Request Log not found")
+        return log
 
+@app.get("/v1/analytics/summary")
+async def get_calculation_summary():
+    """Calculate total cost, total requests, and cache hit ratio."""
+    async with AsyncSessionLocal() as db:
+        
+        # 1. Calculate Total Requests: COUNT(id)
+        total_req_result = await db.execute(select(func.count(RequestLog.id)))
+        total_requests = total_req_result.scalar() or 0
 
+        # 2. Calculate Total Cost: SUM(cost_usd)
+        total_cost_result = await db.execute(select(func.sum(RequestLog.cost_usd)))
+        total_cost = total_cost_result.scalar() or 0.0
 
+        # 3. Calculate Average Latency: AVG(latency_ms)
+        avg_latency_result = await db.execute(select(func.avg(RequestLog.latency_ms)))
+        avg_latency = avg_latency_result.scalar() or 0.0
+
+        # 4. Calculate Cache Hit Rate
+        # First, count how many requests had is_cache_hit = True
+        cache_hits_query = select(func.count(RequestLog.id)).where(RequestLog.is_cache_hit == True)
+        cache_hits_result = await db.execute(cache_hits_query)
+        cache_hits = cache_hits_result.scalar() or 0
+
+        # Do the math in Python
+        hit_rate = (cache_hits / total_requests * 100) if total_requests > 0 else 0.0
+
+        return {
+            "total_cost_usd": round(total_cost, 6),
+            "total_requests": total_requests,
+            "average_latency_ms": round(avg_latency, 2),
+            "cache_hit_rate_percentage": round(hit_rate, 2)
+        }
 
