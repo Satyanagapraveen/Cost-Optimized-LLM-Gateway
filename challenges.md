@@ -44,3 +44,21 @@ model_name = config.yaml.models.low_tier
 ```
 
 That change made the smoke test succeed and returned `verified` from the configured Groq model.
+
+## Challenge 3
+
+### Background database logging failed in BackgroundTasks
+
+**Error logs when I tried to run it**
+
+```text
+Background database logging failed: app.db.models.RequestLog() argument after ** must be a mapping, not RequestLog
+```
+
+**Problem**
+
+The API was creating a `RequestLog` object first and then passing that object into `log_telemetry_background()`. Inside the background function, the code tried to do `RequestLog(**log_data)`, but `**` only works on a mapping like a `dict`, not on a SQLAlchemy model instance.
+
+**Fix**
+
+Pass a plain dictionary into the background task, then construct `RequestLog(**log_data)` inside the worker function. After that change, the API returned `200 OK` and the background insert no longer failed.
