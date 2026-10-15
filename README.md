@@ -24,7 +24,7 @@ flowchart LR
     Pre --> Embed[Embedding Generator]
     Embed --> Redis[(Redis Vector Cache)]
 
-    Redis -- "Hit (Cosine >= 0.95)" --> CachedResp[Return Cached Result\n$0.00 | <10ms]
+    Redis -- "Hit (Cosine >= 0.95)" --> CachedResp[Return Cached Result<br/>$0.00 | <10ms]
     Redis -- "Miss" --> Router[Intelligent Router]
 
     Router -- "Keyword / >1k Tokens" --> HighTier[High-Tier Model]
@@ -37,7 +37,7 @@ flowchart LR
     StoreCache --> UserResp[Return Fresh Response]
 
     CachedResp & UserResp -.-> BGTask[FastAPI BackgroundTasks]
-    BGTask -.-> PG[(PostgreSQL\nAsync Connection Pool)]
+    BGTask -.-> PG[(PostgreSQL<br/>Async Connection Pool)]
 ```
 
 ## 🛠️ Tech Stack & Dependencies
@@ -64,7 +64,7 @@ Ensure you have the following installed:
 ### 2. Clone the Repository & Configure Environment
 
 ```bash
-git clone https://github.com/your-username/cost-optimized-llm-gateway.git
+git clone https://github.com/Satyanagapraveen/Cost-Optimized-LLM-Gateway
 cd cost-optimized-llm-gateway
 cp .env.example .env
 ```
