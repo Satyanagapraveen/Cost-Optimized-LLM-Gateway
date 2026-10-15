@@ -2,10 +2,12 @@ import httpx
 import pytest
 import uuid
 from app.api.main import app
+import asyncio
 
 @pytest.mark.asyncio
 async def test_cache_end_to_end():
-    async with httpx.AsyncClient(app=app,base_url="http://webserver") as client:
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
         # We generate a random UUID so the prompt is 100% unique every time the test runs.
         # This guarantees the first request is ALWAYS a cache miss.
         unique_prompt = f"Integration Test {uuid.uuid4().hex}: What is the speed of light?"
@@ -24,7 +26,7 @@ async def test_cache_end_to_end():
         # 3. ASSERT (First Request)
         assert response1.status_code == 200
         assert data1["cache_hit"] is False  # Must be false
-
+        
         # 4. ACT (Second Request - Exact same payload)
         print("Sending second request (Should be Cache Hit)...")
         response2 = await client.post("/v1/chat/completions", json=payload)
