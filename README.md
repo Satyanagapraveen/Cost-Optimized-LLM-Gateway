@@ -24,7 +24,7 @@ flowchart LR
     Pre --> Embed[Embedding Generator]
     Embed --> Redis[(Redis Vector Cache)]
 
-    Redis -- "Hit (Cosine >= 0.95)" --> CachedResp[Return Cached Result<br/>$0.00 | <10ms]
+    Redis -- "Hit (Cosine >= 0.95)" --> CachedResp["Cached result<br/>$0.00 / 10ms"]
     Redis -- "Miss" --> Router[Intelligent Router]
 
     Router -- "Keyword / >1k Tokens" --> HighTier[High-Tier Model]
@@ -37,7 +37,7 @@ flowchart LR
     StoreCache --> UserResp[Return Fresh Response]
 
     CachedResp & UserResp -.-> BGTask[FastAPI BackgroundTasks]
-    BGTask -.-> PG[(PostgreSQL<br/>Async Connection Pool)]
+    BGTask -.-> PG["PostgreSQL<br/>async pool"]
 ```
 
 ## 🛠️ Tech Stack & Dependencies
