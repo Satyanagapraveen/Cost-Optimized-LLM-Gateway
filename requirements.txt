@@ -9,3 +9,5 @@ redis
 sqlalchemy
 asyncpg
 greenlet
+pytest
+pytest-asyncio

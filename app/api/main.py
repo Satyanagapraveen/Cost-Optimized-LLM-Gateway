@@ -120,7 +120,20 @@ async def get_request_log(request_id:uuid.UUID):
         log = result.scalar_one_or_none()
         if not log:
             raise HTTPException(status_code=404, detail=" Request Log not found")
-        return log
+        
+        # Safely convert the SQLAlchemy object into a JSON-friendly dictionary
+        return {
+        "id": log.id,
+        "timestamp": log.timestamp,
+        "user_id": log.user_id,
+        "model_used": log.model_used,
+        "prompt_tokens": log.prompt_tokens,
+        "completion_tokens": log.completion_tokens,
+        "total_tokens": log.total_tokens,
+        "cost_usd": log.cost_usd,
+        "latency_ms": log.latency_ms,
+        "is_cache_hit": log.is_cache_hit
+        }
 
 @app.get("/v1/analytics/summary")
 async def get_calculation_summary():
